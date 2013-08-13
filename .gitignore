@@ -11,3 +11,5 @@
 *.lai
 *.la
 *.a
+
+wavelet_tree_test
