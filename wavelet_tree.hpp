@@ -13,9 +13,9 @@
 #include <vector>
 
 class wavelet_tree {
-  std::string _alphabets[2];
   std::vector<bool> _bits;
-  std::unique_ptr<wavelet_tree> _left, _right;
+  std::unique_ptr<wavelet_tree> _children[2];
+  char _alphabets[2];
 public:
   wavelet_tree(const std::string &str);
   operator std::string() const;

@@ -22,18 +22,17 @@ wavelet_tree::wavelet_tree(const std::string &str) {
                     right_ss << c;
                   }
                 });
-  std::stringstream left_alphabet_ss, right_alphabet_ss;
-  auto mid = set.begin();
-  std::advance(mid, left_alphabet_size);
-  std::copy(set.begin(), mid, std::ostream_iterator<char>(left_alphabet_ss));
-  std::copy(mid, set.end(), std::ostream_iterator<char>(right_alphabet_ss));
-  _alphabets[0] = left_alphabet_ss.str();
-  _alphabets[1] = right_alphabet_ss.str();
   if (left_alphabet_size > 1) {
-    _left.reset(new wavelet_tree(left_ss.str()));
+    _children[0].reset(new wavelet_tree(left_ss.str()));
+  } else {
+    _alphabets[0] = *set.begin();
   }
   if (alphabet_size - left_alphabet_size > 1) {
-    _right.reset(new wavelet_tree(right_ss.str()));
+    _children[1].reset(new wavelet_tree(right_ss.str()));
+  } else {
+    auto mid = set.begin();
+    std::advance(mid, left_alphabet_size);
+    _alphabets[1] = *mid;
   }
 }
 
@@ -72,10 +71,10 @@ public:
 
 wavelet_tree::operator std::string() const {
   std::stringstream ss;
-  const std::string &left_str = _left ? (std::string) *_left : "";
-  const std::string &right_str = _right ? (std::string) *_right : "";
-  maybe_iterator left_it(left_str, *_alphabets[0].begin());
-  maybe_iterator right_it(right_str, *_alphabets[1].begin());
+  const std::string &left_str = _children[0] ? (std::string) *_children[0] : "";
+  const std::string &right_str = _children[1] ? (std::string) *_children[1] : "";
+  maybe_iterator left_it(left_str, _alphabets[0]);
+  maybe_iterator right_it(right_str, _alphabets[1]);
   std::for_each(_bits.begin(), _bits.end(),
                 [&ss, &left_it, &right_it, this](bool bit) {
                   if (!bit) {
@@ -105,13 +104,13 @@ void wavelet_tree::dprint(size_t depth) const {
   std::copy(_alphabets[1].begin(), _alphabets[1].end(), std::ostream_iterator<char>(std::cout));
   std::cout << std::endl;
 
-  if (_left) {
+  if (_children[0]) {
     std::cout << pfx << "left:" << std::endl;
-    _left->dprint(depth + 1);
+    _children[0]->dprint(depth + 1);
   }
-  if (_right) {
+  if (_children[1]) {
     std::cout << pfx << "right:" << std::endl;
-    _right->dprint(depth + 1);
+    _children[1]->dprint(depth + 1);
   }    
 }
 #endif
